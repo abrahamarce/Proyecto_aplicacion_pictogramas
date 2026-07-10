@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
+  /* Variables globales de color, radio de esquinas y tamaño mínimo táctil */
   :root{
     --bg: #F5F6F1;
     --surface: #FFFFFF;
@@ -38,6 +39,7 @@
 
   *{ box-sizing: border-box; }
 
+  /* Estilos base: fondo, tipografía y que la página ocupe toda la pantalla */
   html, body{
     margin:0; padding:0; height:100%;
     background: var(--bg);
@@ -45,16 +47,19 @@
     font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
   }
 
+  /* body en columna para apilar header, contenido y barra inferior */
   body{
     display:flex;
     flex-direction:column;
     min-height:100vh;
   }
 
+  /* Respeta la preferencia del sistema de reducir animaciones (accesibilidad) */
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
 
+  /* Resalta con un contorno grueso el elemento enfocado con teclado */
   :focus-visible{
     outline: 4px solid var(--focus);
     outline-offset: 2px;
@@ -72,6 +77,7 @@
     flex-wrap:wrap;
   }
 
+  /* Logo/nombre de la app en la esquina izquierda del header */
   .brand{
     display:flex;
     align-items:center;
@@ -87,6 +93,7 @@
     font-size:1.3rem;
   }
 
+  /* Interruptor tipo "píldora" para elegir entre modo Pictogramas y modo Escribir */
   .mode-toggle{
     display:flex;
     background: var(--bg);
@@ -107,12 +114,14 @@
     cursor:pointer;
     color: var(--ink-soft);
   }
+  /* Botón del modo activo se ve resaltado (fondo oscuro) */
   .mode-toggle button[aria-pressed="true"]{
     background: var(--ink);
     color: #fff;
   }
 
   /* ---------- Categorías (modo pictogramas) ---------- */
+  /* Fila horizontal con scroll de "chips" para elegir la categoría de pictogramas */
   .categorias{
     display:flex;
     gap:10px;
@@ -120,6 +129,7 @@
     overflow-x:auto;
     background: var(--bg);
   }
+  /* Chip de categoría: se ve atenuado si no está seleccionado */
   .cat-chip{
     flex: 0 0 auto;
     border: none;
@@ -137,6 +147,7 @@
     border: 3px solid transparent;
     opacity:0.55;
   }
+  /* Categoría activa: totalmente opaca y con borde marcado */
   .cat-chip[aria-pressed="true"]{
     opacity:1;
     border-color: var(--ink);
@@ -151,12 +162,14 @@
     gap:16px;
   }
 
+  /* Cuadrícula responsiva de pictogramas de la categoría activa */
   .grid-pictogramas{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap:12px;
   }
 
+  /* Botón individual de pictograma (emoji + palabra) */
   .pictograma{
     border: none;
     border-radius: var(--radius);
@@ -171,11 +184,13 @@
     font-family:inherit;
     box-shadow: 0 2px 0 rgba(0,0,0,0.08);
   }
+  /* Efecto de "presionado" al tocar el pictograma */
   .pictograma:active{ transform: translateY(2px); box-shadow:none; }
   .pictograma .emoji{ font-size: 2.4rem; line-height:1; }
   .pictograma .palabra{ font-weight:700; font-size:1rem; text-align:center; }
 
   /* ---------- Modo texto ---------- */
+  /* Contenedor del formulario de escritura libre */
   .modo-texto{
     display:flex;
     flex-direction:column;
@@ -186,6 +201,7 @@
     font-weight:700;
     font-size:1.1rem;
   }
+  /* Cuadro de texto grande donde el usuario escribe lo que quiere decir */
   .modo-texto textarea{
     flex:1;
     min-height: 180px;
@@ -204,6 +220,7 @@
   }
 
   /* ---------- Barra inferior: frase construida ---------- */
+  /* Franja fija en la parte inferior con la frase armada y los botones de acción */
   .barra-frase{
     background: var(--surface);
     border-top: 2px solid var(--line);
@@ -212,6 +229,7 @@
     align-items:center;
     gap:12px;
   }
+  /* Caja donde se van mostrando los "chips" de palabras de la frase */
   .frase-actual{
     flex:1;
     min-height: 56px;
@@ -223,11 +241,13 @@
     align-items:center;
     gap:8px;
   }
+  /* Texto de ayuda que aparece solo cuando todavía no hay ninguna palabra */
   .frase-actual:empty::before{
     content: "Toca pictogramas para armar una frase…";
     color: var(--ink-soft);
     font-style: italic;
   }
+  /* Cada palabra ya agregada a la frase se muestra como una píldora */
   .frase-chip{
     background: var(--bg);
     border-radius: 999px;
@@ -236,6 +256,7 @@
     font-size:0.95rem;
   }
 
+  /* Estilo base compartido por los botones de acción (Borrar / Hablar) */
   .btn{
     font-family:inherit;
     font-weight:700;
@@ -262,6 +283,7 @@
     border: 2px solid var(--line);
   }
 
+  /* Oculta visualmente un elemento pero lo deja disponible para lectores de pantalla */
   .visually-hidden{
     position:absolute;
     width:1px; height:1px;
@@ -272,6 +294,7 @@
 
   [hidden]{ display:none !important; }
 
+  /* Ajustes para pantallas angostas (celulares) */
   @media (max-width: 480px){
     .brand span:last-child{ display:none; }
     .grid-pictogramas{ grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
@@ -281,6 +304,7 @@
 </head>
 <body>
 
+<!-- Encabezado: marca de la app y el interruptor de modo (pictogramas / escribir) -->
 <header>
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">💬</span>
@@ -297,7 +321,7 @@
   </div>
 </header>
 
-<!-- MODO PICTOGRAMAS -->
+<!-- MODO PICTOGRAMAS: categorías y grilla se generan por JavaScript (ver renderCategorias/renderGrid) -->
 <div id="vista-pictogramas">
   <nav class="categorias" id="lista-categorias" aria-label="Categorías de pictogramas"></nav>
   <main>
@@ -305,7 +329,7 @@
   </main>
 </div>
 
-<!-- MODO TEXTO -->
+<!-- MODO TEXTO: oculto por defecto (atributo "hidden"), se muestra al cambiar de modo -->
 <div id="vista-texto" hidden>
   <main>
     <div class="modo-texto">
@@ -316,13 +340,14 @@
   </main>
 </div>
 
-<!-- BARRA INFERIOR (solo modo pictogramas) -->
+<!-- BARRA INFERIOR (solo visible en modo pictogramas): frase armada y botones de acción -->
 <div class="barra-frase" id="barra-frase">
   <div class="frase-actual" id="frase-actual" role="status" aria-live="polite" aria-label="Frase construida"></div>
   <button class="btn btn-limpiar" onclick="limpiarFrase()" aria-label="Borrar frase">🗑️ Borrar</button>
   <button class="btn btn-hablar" onclick="hablarFrase()" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
 </div>
 
+<!-- Región "viva" invisible: los lectores de pantalla anuncian aquí mensajes de estado (anunciar()) -->
 <div id="anuncios" class="visually-hidden" aria-live="assertive"></div>
 
 <script>
@@ -333,6 +358,7 @@
      mientras tanto se usa speechSynthesis como respaldo.
      ========================================================= */
 
+  // Lista de categorías gramaticales: cada una define su color de fondo/texto (clave Fitzgerald)
   const CATEGORIAS = [
     { id: 'personas',    nombre: 'Personas',   color: 'var(--cat-personas)',    colorInk: 'var(--cat-personas-ink)' },
     { id: 'acciones',    nombre: 'Acciones',   color: 'var(--cat-acciones)',    colorInk: 'var(--cat-acciones-ink)' },
@@ -342,6 +368,8 @@
     { id: 'social',      nombre: 'Social',     color: 'var(--cat-social)',      colorInk: 'var(--cat-social-ink)' },
   ];
 
+  // Banco de pictogramas: palabra, categoría a la que pertenece, emoji que se muestra
+  // y audioUrl (grabación real, hoy en null → se usa síntesis de voz como respaldo)
   const PICTOGRAMAS = [
     { id:'p001', palabra:'yo',        categoria:'personas',    emoji:'🙋', audioUrl:null },
     { id:'p002', palabra:'vos',       categoria:'personas',    emoji:'👉', audioUrl:null },
@@ -379,6 +407,7 @@
      Cuando lleguen los audios grabados, solo hay que llenar
      audioUrl en cada objeto — esta función no cambia.
      ========================================================= */
+  // Reproduce un audio grabado si existe; si no, recurre a la voz sintetizada del navegador
   function reproducirTexto(texto, audioUrl){
     if (audioUrl){
       const audio = new Audio(audioUrl);
@@ -389,12 +418,14 @@
       anunciar('El navegador no soporta voz por síntesis.');
       return;
     }
+    // Cancela cualquier lectura en curso para que no se superpongan dos voces
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'es-ES';
     window.speechSynthesis.speak(utterance);
   }
 
+  // Escribe un mensaje en la región "viva" para que lectores de pantalla lo anuncien
   function anunciar(mensaje){
     document.getElementById('anuncios').textContent = mensaje;
   }
@@ -402,6 +433,7 @@
   /* =========================================================
      MODO: alternar entre pictogramas y texto
      ========================================================= */
+  // Muestra la vista pictogramas o la vista texto, y actualiza los botones del interruptor
   function cambiarModo(modo){
     const esPictogramas = modo === 'pictogramas';
     document.getElementById('vista-pictogramas').hidden = !esPictogramas;
@@ -417,9 +449,10 @@
   /* =========================================================
      MODO PICTOGRAMAS
      ========================================================= */
-  let categoriaActiva = 'personas';
-  let frase = [];
+  let categoriaActiva = 'personas'; // categoría seleccionada actualmente en los chips
+  let frase = [];                   // lista de pictogramas que el usuario va tocando, en orden
 
+  // Dibuja los chips de categorías; resalta el que coincide con categoriaActiva
   function renderCategorias(){
     const cont = document.getElementById('lista-categorias');
     cont.innerHTML = '';
@@ -430,11 +463,13 @@
       btn.style.background = cat.color;
       btn.style.color = cat.colorInk;
       btn.textContent = cat.nombre;
+      // Al hacer clic, cambia la categoría activa y vuelve a dibujar chips + grilla
       btn.onclick = () => { categoriaActiva = cat.id; renderCategorias(); renderGrid(); };
       cont.appendChild(btn);
     });
   }
 
+  // Dibuja la grilla de pictogramas filtrando solo los de la categoría activa
   function renderGrid(){
     const grid = document.getElementById('grid-pictogramas');
     grid.innerHTML = '';
@@ -452,12 +487,14 @@
     });
   }
 
+  // Al tocar un pictograma: se agrega a la frase, se refresca la barra inferior y se dice en voz alta
   function tocarPictograma(p){
     frase.push(p);
     renderFrase();
     reproducirTexto(p.palabra, p.audioUrl);
   }
 
+  // Vuelve a dibujar los chips de palabras de la frase actual en la barra inferior
   function renderFrase(){
     const cont = document.getElementById('frase-actual');
     cont.innerHTML = '';
@@ -469,12 +506,14 @@
     });
   }
 
+  // Vacía la frase construida y avisa el cambio a los lectores de pantalla
   function limpiarFrase(){
     frase = [];
     renderFrase();
     anunciar('Frase borrada');
   }
 
+  // Une todas las palabras de la frase y las reproduce como una sola oración
   function hablarFrase(){
     if (frase.length === 0){
       anunciar('No hay ninguna frase para reproducir');
@@ -488,6 +527,7 @@
      MODO TEXTO
      ========================================================= */
   const entradaTexto = document.getElementById('entrada-texto');
+  // Enter (sin Shift) reproduce en voz alta el texto escrito, sin insertar salto de línea
   entradaTexto.addEventListener('keydown', (evento) => {
     if (evento.key === 'Enter' && !evento.shiftKey){
       evento.preventDefault();
@@ -499,7 +539,7 @@
   });
 
   /* =========================================================
-     INICIO
+     INICIO: primer dibujado de categorías y pictogramas al cargar la página
      ========================================================= */
   renderCategorias();
   renderGrid();
