@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Comunica — Apoyo para la comunicación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<!-- Encabezado: marca de la app y el interruptor de modo (pictogramas / escribir) -->
+<header>
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">💬</span>
+    <span>Comunica</span>
+  </div>
+
+  <div class="mode-toggle" role="group" aria-label="Elegir modo de comunicación">
+    <button id="btn-modo-pictogramas" aria-pressed="true" onclick="cambiarModo('pictogramas')">
+      🖼️ Pictogramas
+    </button>
+    <button id="btn-modo-texto" aria-pressed="false" onclick="cambiarModo('texto')">
+      ⌨️ Escribir
+    </button>
+  </div>
+</header>
+
+<!-- MODO PICTOGRAMAS: categorías y grilla se generan por JavaScript (ver renderCategorias/renderGrid en js/app.js) -->
+<div id="vista-pictogramas">
+  <nav class="categorias" id="lista-categorias" aria-label="Categorías de pictogramas"></nav>
+  <main>
+    <div class="grid-pictogramas" id="grid-pictogramas" role="list" aria-label="Pictogramas disponibles"></div>
+  </main>
+</div>
+
+<!-- MODO TEXTO: oculto por defecto (atributo "hidden"), se muestra al cambiar de modo -->
+<div id="vista-texto" hidden>
+  <main>
+    <div class="modo-texto">
+      <label for="entrada-texto">Escribí lo que querés decir</label>
+      <textarea id="entrada-texto" placeholder="Escribí aquí…" aria-describedby="ayuda-texto"></textarea>
+      <p id="ayuda-texto" class="ayuda-texto">Presioná Enter o el botón "Hablar" para escuchar el texto en voz alta.</p>
+    </div>
+  </main>
+</div>
+
+<!-- BARRA INFERIOR (solo visible en modo pictogramas): frase armada y botones de acción -->
+<div class="barra-frase" id="barra-frase">
+  <div class="frase-actual" id="frase-actual" role="status" aria-live="polite" aria-label="Frase construida"></div>
+  <button class="btn btn-limpiar" onclick="limpiarFrase()" aria-label="Borrar frase">🗑️ Borrar</button>
+  <button class="btn btn-hablar" onclick="hablarFrase()" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
+</div>
+
+<!-- Región "viva" invisible: los lectores de pantalla anuncian aquí mensajes de estado (anunciar()) -->
+<div id="anuncios" class="visually-hidden" aria-live="assertive"></div>
+
+<!-- Toda la lógica de la app vive en js/app.js -->
+<script src="js/app.js"></script>
+</body>
+</html>
