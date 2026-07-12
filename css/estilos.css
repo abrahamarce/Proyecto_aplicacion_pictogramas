@@ -177,6 +177,12 @@ main{
 /* Efecto de "presionado" al tocar el pictograma */
 .pictograma:active{ transform: translateY(2px); box-shadow:none; }
 .pictograma .emoji{ font-size: 2.4rem; line-height:1; }
+.pictograma .pictograma-img{
+  width: 100%; 
+  max-width: 72px; /*limita que tan grande puede ser la imagen del pictograma*/
+  aspect-ratio: 1 / 1; /*fuerza que la imagen sea cuadrada*/
+  object-fit: contain; /*hace que la imagen se escale para caber dentro del cuadro sin deformarse*/
+}
 .pictograma .palabra{ font-weight:700; font-size:1rem; text-align:center; }
 
 /* ---------- Modo texto ---------- */

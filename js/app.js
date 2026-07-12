@@ -18,35 +18,35 @@ const CATEGORIAS = [
 // Banco de pictogramas: palabra, categoría a la que pertenece, emoji que se muestra
 // y audioUrl (grabación real, hoy en null → se usa síntesis de voz como respaldo)
 const PICTOGRAMAS = [
-  { id:'p001', palabra:'yo',        categoria:'personas',    emoji:'🙋', audioUrl:null },
-  { id:'p002', palabra:'vos',       categoria:'personas',    emoji:'👉', audioUrl:null },
-  { id:'p003', palabra:'mamá',      categoria:'personas',    emoji:'👩', audioUrl:null },
-  { id:'p004', palabra:'papá',      categoria:'personas',    emoji:'👨', audioUrl:null },
+  { id:'p001', palabra:'yo',        categoria:'personas',    imagen:'pictogramas/yo.png',     emoji:'🙋', audioUrl:null },
+  { id:'p002', palabra:'vos',       categoria:'personas',    imagen:'pictogramas/vos.png',     emoji:'👉', audioUrl:null },
+  { id:'p003', palabra:'mamá',      categoria:'personas',    imagen:'pictogramas/mama.png',     emoji:'👩', audioUrl:null },
+  { id:'p004', palabra:'papá',      categoria:'personas',    imagen:'pictogramas/papa.png',     emoji:'👨', audioUrl:null },
 
-  { id:'p010', palabra:'querer',    categoria:'acciones',    emoji:'🤲', audioUrl:null },
-  { id:'p011', palabra:'ir',        categoria:'acciones',    emoji:'🚶', audioUrl:null },
-  { id:'p012', palabra:'comer',     categoria:'acciones',    emoji:'🍽️', audioUrl:null },
-  { id:'p013', palabra:'jugar',     categoria:'acciones',    emoji:'🎲', audioUrl:null },
-  { id:'p014', palabra:'ayudar',    categoria:'acciones',    emoji:'🤝', audioUrl:null },
+  { id:'p010', palabra:'querer',    categoria:'acciones',   imagen:'pictogramas/querer.png',     emoji:'🤲', audioUrl:null },
+  { id:'p011', palabra:'ir',        categoria:'acciones',   imagen:'pictogramas/ir.png',     emoji:'🚶', audioUrl:null },
+  { id:'p012', palabra:'comer',     categoria:'acciones',   imagen:'pictogramas/comer.png',     emoji:'🍽️', audioUrl:null },
+  { id:'p013', palabra:'jugar',     categoria:'acciones',   imagen:'pictogramas/jugar.png',     emoji:'🎲', audioUrl:null },
+  { id:'p014', palabra:'ayudar',    categoria:'acciones',   imagen:'pictogramas/ayudar.png',     emoji:'🤝', audioUrl:null },
 
-  { id:'p020', palabra:'feliz',     categoria:'descripcion', emoji:'😊', audioUrl:null },
-  { id:'p021', palabra:'triste',    categoria:'descripcion', emoji:'😢', audioUrl:null },
-  { id:'p022', palabra:'cansado',   categoria:'descripcion', emoji:'😴', audioUrl:null },
-  { id:'p023', palabra:'grande',    categoria:'descripcion', emoji:'📏', audioUrl:null },
+  { id:'p020', palabra:'feliz',     categoria:'descripcion', imagen:'pictogramas/feliz.png',     emoji:'😊', audioUrl:null },
+  { id:'p021', palabra:'triste',    categoria:'descripcion', imagen:'pictogramas/triste.png',     emoji:'😢', audioUrl:null },
+  { id:'p022', palabra:'cansado',   categoria:'descripcion', imagen:'pictogramas/cansado.png',     emoji:'😴', audioUrl:null },
+  { id:'p023', palabra:'grande',    categoria:'descripcion', imagen:'pictogramas/grande.png',     emoji:'📏', audioUrl:null },
 
-  { id:'p030', palabra:'agua',      categoria:'objetos',     emoji:'💧', audioUrl:null },
-  { id:'p031', palabra:'comida',    categoria:'objetos',     emoji:'🍞', audioUrl:null },
-  { id:'p032', palabra:'baño',      categoria:'objetos',     emoji:'🚻', audioUrl:null },
-  { id:'p033', palabra:'pelota',    categoria:'objetos',     emoji:'⚽', audioUrl:null },
+  { id:'p030', palabra:'agua',      categoria:'objetos',   imagen:'pictogramas/agua.png',     emoji:'💧', audioUrl:null },
+  { id:'p031', palabra:'comida',    categoria:'objetos',   imagen:'pictogramas/comida.png',     emoji:'🍞', audioUrl:null },
+  { id:'p032', palabra:'baño',      categoria:'objetos',   imagen:'pictogramas/bano.png',     emoji:'🚻', audioUrl:null },
+  { id:'p033', palabra:'pelota',    categoria:'objetos',   imagen:'pictogramas/pelota.png',     emoji:'⚽', audioUrl:null },
 
-  { id:'p040', palabra:'qué',       categoria:'preguntas',   emoji:'❓', audioUrl:null },
-  { id:'p041', palabra:'dónde',     categoria:'preguntas',   emoji:'📍', audioUrl:null },
-  { id:'p042', palabra:'cuándo',    categoria:'preguntas',   emoji:'⏰', audioUrl:null },
+  { id:'p040', palabra:'qué',       categoria:'preguntas',   imagen:'pictogramas/que.png',     emoji:'❓', audioUrl:null },
+  { id:'p041', palabra:'dónde',     categoria:'preguntas',   imagen:'pictogramas/donde.png',     emoji:'📍', audioUrl:null },
+  { id:'p042', palabra:'cuándo',    categoria:'preguntas',   imagen:'pictogramas/cuando.png',     emoji:'⏰', audioUrl:null },
 
-  { id:'p050', palabra:'hola',      categoria:'social',      emoji:'👋', audioUrl:null },
-  { id:'p051', palabra:'gracias',   categoria:'social',      emoji:'🙏', audioUrl:null },
-  { id:'p052', palabra:'sí',        categoria:'social',      emoji:'✅', audioUrl:null },
-  { id:'p053', palabra:'no',        categoria:'social',      emoji:'🚫', audioUrl:null },
+  { id:'p050', palabra:'hola',      categoria:'social',      imagen:'pictogramas/hola.png',     emoji:'👋', audioUrl:null },
+  { id:'p051', palabra:'gracias',   categoria:'social',      imagen:'pictogramas/gracias.png',     emoji:'🙏', audioUrl:null },
+  { id:'p052', palabra:'sí',        categoria:'social',      imagen:'pictogramas/si.png',     emoji:'✅', audioUrl:null },
+  { id:'p053', palabra:'no',        categoria:'social',      imagen:'pictogramas/no.png',     emoji:'🚫', audioUrl:null },
 ];
 
 /* =========================================================
@@ -128,7 +128,11 @@ function renderGrid(){
     btn.style.color = cat.colorInk;
     btn.setAttribute('role', 'listitem');
     btn.setAttribute('aria-label', p.palabra);
-    btn.innerHTML = `<span class="emoji" aria-hidden="true">${p.emoji}</span><span class="palabra">${p.palabra}</span>`;
+    const contenidoVisual = p.imagen
+  ? `<img class="pictograma-img" src="${p.imagen}" alt="">`
+  : `<span class="emoji" aria-hidden="true">${p.emoji}</span>`;
+
+  btn.innerHTML = `${contenidoVisual}<span class="palabra">${p.palabra}</span>`;
     btn.onclick = () => tocarPictograma(p);
     grid.appendChild(btn);
   });
