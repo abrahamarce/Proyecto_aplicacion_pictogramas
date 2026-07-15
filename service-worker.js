@@ -1,6 +1,7 @@
 const NOMBRE_CACHE = 'comunica-v1';
 
 const ARCHIVOS_A_GUARDAR = [
+  './',
   'index.html',
   'css/estilos.css',
   'js/app.js',
@@ -49,6 +50,20 @@ self.addEventListener('fetch', (evento) => {
   evento.respondWith(
     caches.match(evento.request).then((respuestaGuardada) => {
       return respuestaGuardada || fetch(evento.request);
+    })
+  );
+});
+
+// Se ejecuta cuando el service worker nuevo toma control.
+// Borra cualquier copia guardada de versiones anteriores.
+self.addEventListener('activate', (evento) => {
+  evento.waitUntil(
+    caches.keys().then((nombresGuardados) => {
+      return Promise.all(
+        nombresGuardados
+          .filter((nombre) => nombre !== NOMBRE_CACHE)
+          .map((nombre) => caches.delete(nombre))
+      );
     })
   );
 });
