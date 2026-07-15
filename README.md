@@ -37,8 +37,16 @@ Este es un archivo json donde cada línea hace lo siguiente:
 
 1. `` "name" `` y `` "short_name" `` es el nombre completo y el nombre corto que se va a mostrar debajo del ícono en la pantalla de inicio.
 2. `` "star_url" `` caul es el archivo que abre cuando se toca el ícono.
-3. `` "background_color" `` y `` "background_color" `` son los colores que usa el sistema colores que usa el sistema mienstras la app carga y en la barra de estado
-4. `` "icons" `` es la lista de íconos
+3. `` "background_color" `` y `` "background_color" `` son los colores que usa el sistema colores que usa el sistema mienstras la app carga y en la barra de estado.
+4. `` "icons" `` es la lista de íconos.
 
 
-# manifest.json
+# service-worker.js
+
+
+1. `` "NOMBRE_CACHE" `` es una caja donde se guardad los archivos, el v1 es porque es la versión uno, cuando se quiera cambiar se le pone v2 y se crea una nueva caja.
+
+2. `` "ARCHIVOS_A_GUARDAR" `` es la lista de lo que neesita la aplicación para funcionar sin conexión.
+3. Eventos:
+   1. `` "install" `` es un evento que solo pasa una vez, la primera vez que alguien visita la app, ahí se descarga y guarda todo.
+   2. `` "fetch" `` pasa siempre, cada vez que la página pide cualquier recurso. si lo tiene guardado usa ese recurso, sino lo busca en internet.
