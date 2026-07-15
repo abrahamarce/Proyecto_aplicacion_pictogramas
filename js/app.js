@@ -200,3 +200,16 @@ document.addEventListener('DOMContentLoaded', () => {
   renderGrid();
   iniciarModoTexto();
 });
+
+
+/* =========================================================
+   REGISTRO DEL SERVICE WORKER: habilita el funcionamiento
+   sin conexión (PWA) cacheando los recursos de la app
+   ========================================================= */
+if ('serviceWorker' in navigator) { // solo si el navegador soporta Service Workers
+  window.addEventListener('load', () => { // se registra tras la carga completa para no competir por recursos
+    navigator.serviceWorker.register('service-worker.js') // registra el archivo que gestiona la caché offline
+      .then(() => console.log('Service worker registrado con éxito')) // confirma el registro exitoso
+      .catch((error) => console.error('Error al registrar el service worker:', error)); // reporta fallos de registro
+  });
+}
