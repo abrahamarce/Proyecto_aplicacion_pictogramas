@@ -10,17 +10,19 @@ Una aplicación PWA es una aplicación que se compila mediante cpdigo como HTLM,
 
 La idea principal de esta aplicación, es ofrecer un entorno con pictogramas tal y como se muestra en la imagen.
 
-![Muestra de la interfaz de la imagen](\Imagenes_readme\muestra.jpg)
+![Muestra de la interfaz de la imagen](imagenes_readme/muestra.jpg)
 
 
 En la imagen se muestran como se observa la apliación, esta cuenta con secciones como: **Personas**, **Acciones**, **Descripción**, etc; que son donde se encuentran los botones de las palabras a elegir por el usuario.
 
 Tal como se muestra, el usuario puede elegir en la aplicación, cual palanbra usar tocando el ícono, ejemplo: **Yo**. Tal como se muestra a continuación:
 
-![ejemplo_yo](\Imagenes_readme\yo.jpg)
+![ejemplo_yo](imagenes_readme/yo.jpg)
 
 Cuando se tocan estos pictogramas, el audio procede a salir cuando se le da al botón de ***Hablar***
 
 También está la opción de cribir, en la cual el usuario puede escribir las frases que desee y estas salen en forma de audio.
 
-![ejemplo_yo](\Imagenes_readme\escribir.jpg)
+![ejemplo_yo](imagenes_readme/escribir.jpg)
+
+Seguir
