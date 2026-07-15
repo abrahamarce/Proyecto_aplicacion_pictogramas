@@ -26,3 +26,19 @@ También está la opción de cribir, en la cual el usuario puede escribir las fr
 ![ejemplo_yo](Imagenes_readme/escribir.jpg)
 
 Seguir.
+
+
+
+## **Sobre el código**
+
+# manifest.json
+
+Este es un archivo json donde cada línea hace lo siguiente:
+
+1. `` "name" `` y `` "short_name" `` es el nombre completo y el nombre corto que se va a mostrar debajo del ícono en la pantalla de inicio.
+2. `` "star_url" `` caul es el archivo que abre cuando se toca el ícono.
+3. `` "background_color" `` y `` "background_color" `` son los colores que usa el sistema colores que usa el sistema mienstras la app carga y en la barra de estado
+4. `` "icons" `` es la lista de íconos
+
+
+# manifest.json

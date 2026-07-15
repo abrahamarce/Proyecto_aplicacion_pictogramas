@@ -1,7 +1,9 @@
+
+
 {
-  "name": "Comunica",  // Nombre completo de la aplicación
-  "short_name": "Comunica", // Nombre corto de la aplicación
-  "start_url": "index.html", // URL de inicio de la aplicación
+  "name": "Comunica",
+  "short_name": "Comunica",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#F5F6F1",
   "theme_color": "#E8871E",
