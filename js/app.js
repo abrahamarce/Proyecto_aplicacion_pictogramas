@@ -18,16 +18,21 @@ const CATEGORIAS = [
 // Banco de pictogramas: palabra, categoría a la que pertenece, emoji que se muestra
 // y audioUrl (grabación real, hoy en null → se usa síntesis de voz como respaldo)
 const PICTOGRAMAS = [
-  { id:'p001', palabra:'yo',        categoria:'personas',    imagen:'pictogramas/yo.png',     emoji:'🙋', audioUrl:null },
-  { id:'p002', palabra:'vos',       categoria:'personas',    imagen:'pictogramas/vos.png',     emoji:'👉', audioUrl:null },
-  { id:'p003', palabra:'mamá',      categoria:'personas',    imagen:'pictogramas/mama.png',     emoji:'👩', audioUrl:null },
-  { id:'p004', palabra:'papá',      categoria:'personas',    imagen:'pictogramas/papa.png',     emoji:'👨', audioUrl:null },
+  { id:'p001', palabra:'yo', categoria:'personas', imagen:'pictogramas/yo.png', emoji:'🙋', audioUrl:null, persona:'yo' },
+  { id:'p002', palabra:'vos', categoria:'personas', imagen:'pictogramas/vos.png', emoji:'👉', audioUrl:null, persona:'vos' },
+  { id:'p003', palabra:'mamá', categoria:'personas', imagen:'pictogramas/mama.png', emoji:'👩', audioUrl:null, persona:'el' },
+  { id:'p004', palabra:'papá', categoria:'personas', imagen:'pictogramas/papa.png', emoji:'👨', audioUrl:null, persona:'el' },
 
-  { id:'p010', palabra:'querer',    categoria:'acciones',   imagen:'pictogramas/querer.png',     emoji:'🤲', audioUrl:null },
-  { id:'p011', palabra:'ir',        categoria:'acciones',   imagen:'pictogramas/ir.png',     emoji:'🚶', audioUrl:null },
-  { id:'p012', palabra:'comer',     categoria:'acciones',   imagen:'pictogramas/comer.png',     emoji:'🍽️', audioUrl:null },
-  { id:'p013', palabra:'jugar',     categoria:'acciones',   imagen:'pictogramas/jugar.png',     emoji:'🎲', audioUrl:null },
-  { id:'p014', palabra:'ayudar',    categoria:'acciones',   imagen:'pictogramas/ayudar.png',     emoji:'🤝', audioUrl:null },
+  { id:'p010', palabra:'querer', categoria:'acciones', imagen:'pictogramas/querer.png', emoji:'🤲', audioUrl:null,
+  conjugaciones: { yo:'quiero', vos:'querés', el:'quiere', nosotros:'queremos', ellos:'quieren' } },
+  { id:'p011', palabra:'ir', categoria:'acciones', imagen:'pictogramas/ir.png', emoji:'🚶', audioUrl:null,
+  conjugaciones: { yo:'voy', vos:'vas', el:'va', nosotros:'vamos', ellos:'van' } },
+  { id:'p012', palabra:'comer', categoria:'acciones', imagen:'pictogramas/comer.png', emoji:'🍽️', audioUrl:null,
+  conjugaciones: { yo:'como', vos:'comés', el:'come', nosotros:'comemos', ellos:'comen' } },
+  { id:'p013', palabra:'jugar', categoria:'acciones', imagen:'pictogramas/jugar.png', emoji:'🎲', audioUrl:null,
+  conjugaciones: { yo:'juego', vos:'jugás', el:'juega', nosotros:'jugamos', ellos:'juegan' } },
+  { id:'p014', palabra:'ayudar', categoria:'acciones', imagen:'pictogramas/ayudar.png', emoji:'🤝', audioUrl:null,
+  conjugaciones: { yo:'ayudo', vos:'ayudás', el:'ayuda', nosotros:'ayudamos', ellos:'ayudan' } },
 
   { id:'p020', palabra:'feliz',     categoria:'descripcion', imagen:'pictogramas/feliz.png',     emoji:'😊', audioUrl:null },
   { id:'p021', palabra:'triste',    categoria:'descripcion', imagen:'pictogramas/triste.png',     emoji:'😢', audioUrl:null },
@@ -164,14 +169,38 @@ function limpiarFrase(){
   anunciar('Frase borrada');
 }
 
+// Determina la persona gramatical (yo/vos/el/nosotros/ellos) a partir
+// del primer pictograma de la frase, si es una persona conocida
+function obtenerSujeto(frase){
+  const primero = frase[0];
+  if (primero && primero.categoria === 'personas' && primero.persona){
+    return primero.persona;
+  }
+  return 'el'; // sin sujeto explícito, se usa tercera persona por defecto
+}
+
+// Arma la frase para hablar: conjuga solo el primer verbo según el sujeto,
+// el resto de las palabras (incluidos otros verbos) quedan tal cual
+function construirFraseNatural(frase){
+  const sujeto = obtenerSujeto(frase);
+  let verboYaConjugado = false;
+  return frase.map(p => {
+    if (p.categoria === 'acciones' && !verboYaConjugado){
+      verboYaConjugado = true;
+      return (p.conjugaciones && p.conjugaciones[sujeto]) || p.palabra;
+    }
+    return p.palabra;
+  }).join(' ');
+}
+
 // Une todas las palabras de la frase y las reproduce como una sola oración
 function hablarFrase(){
   if (frase.length === 0){
     anunciar('No hay ninguna frase para reproducir');
     return;
   }
-  const texto = frase.map(p => p.palabra).join(' ');
-  reproducirTexto(texto, null); // frase completa siempre por síntesis (combinación libre)
+  const texto = construirFraseNatural(frase);
+  reproducirTexto(texto, null);
 }
 
 /* =========================================================
