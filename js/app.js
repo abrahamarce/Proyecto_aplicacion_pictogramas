@@ -222,12 +222,44 @@ function iniciarModoTexto(){
 }
 
 /* =========================================================
+   TEMA CLARO/OSCURO: alternar y persistir el tema
+   ========================================================= */
+function iniciarTema() {
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
+  if (!btnThemeToggle) return;
+
+  function actualizarBotonTema(tema) {
+    if (tema === 'dark') {
+      btnThemeToggle.textContent = '🌙';
+      btnThemeToggle.setAttribute('aria-label', 'Cambiar a modo claro');
+    } else {
+      btnThemeToggle.textContent = '☀️';
+      btnThemeToggle.setAttribute('aria-label', 'Cambiar a modo oscuro');
+    }
+  }
+
+  const temaActual = document.documentElement.getAttribute('data-theme') || 'light';
+  actualizarBotonTema(temaActual);
+
+  btnThemeToggle.addEventListener('click', () => {
+    const esOscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+    const nuevoTema = esOscuro ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', nuevoTema);
+    localStorage.setItem('theme', nuevoTema);
+    actualizarBotonTema(nuevoTema);
+    anunciar(`Modo ${nuevoTema === 'dark' ? 'oscuro' : 'claro'} activado`);
+  });
+}
+
+/* =========================================================
    INICIO: cuando el HTML ya cargó, se dibuja todo por primera vez
    ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
   renderCategorias();
   renderGrid();
   iniciarModoTexto();
+  iniciarTema();
 });
 
 

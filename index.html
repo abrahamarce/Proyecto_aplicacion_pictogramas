@@ -10,6 +10,17 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E8871E">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+  // Script de bloqueo para evitar destello blanco del tema al cargar
+  (function() {
+    const temaGuardado = localStorage.getItem('theme');
+    if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -20,12 +31,17 @@
     <span>Comunica</span>
   </div>
 
-  <div class="mode-toggle" role="group" aria-label="Elegir modo de comunicación">
-    <button id="btn-modo-pictogramas" aria-pressed="true" onclick="cambiarModo('pictogramas')">
-      🖼️ Pictogramas
-    </button>
-    <button id="btn-modo-texto" aria-pressed="false" onclick="cambiarModo('texto')">
-      ⌨️ Escribir
+  <div class="header-actions">
+    <div class="mode-toggle" role="group" aria-label="Elegir modo de comunicación">
+      <button id="btn-modo-pictogramas" aria-pressed="true" onclick="cambiarModo('pictogramas')">
+        🖼️ Pictogramas
+      </button>
+      <button id="btn-modo-texto" aria-pressed="false" onclick="cambiarModo('texto')">
+        ⌨️ Escribir
+      </button>
+    </div>
+    <button id="btn-theme-toggle" class="btn-theme-toggle" aria-label="Cambiar tema (claro/oscuro)">
+      ☀️
     </button>
   </div>
 </header>

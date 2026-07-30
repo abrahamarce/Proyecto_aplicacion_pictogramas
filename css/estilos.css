@@ -28,6 +28,32 @@
   --touch-min: 88px;
 }
 
+/* Paleta para modo oscuro */
+[data-theme="dark"] {
+  --bg: #12181B;
+  --surface: #1E2629;
+  --ink: #F5F6F1;
+  --ink-soft: #A3B3B2;
+  --line: #2D3A3E;
+  --primary: #FF9E3D;
+  --primary-ink: #201000;
+  --focus: #388BFD;
+
+  /* Las categorías se suavizan un poco para evitar brillo excesivo en fondo oscuro */
+  --cat-personas: #E3C24D;
+  --cat-personas-ink: #2D2300;
+  --cat-acciones: #5E944D;
+  --cat-acciones-ink: #FFFFFF;
+  --cat-descripcion: #4C7CAE;
+  --cat-descripcion-ink: #FFFFFF;
+  --cat-objetos: #C2763D;
+  --cat-objetos-ink: #261100;
+  --cat-preguntas: #876AA9;
+  --cat-preguntas-ink: #FFFFFF;
+  --cat-social: #D37EA0;
+  --cat-social-ink: #330313;
+}
+
 *{ box-sizing: border-box; }
 
 /* Estilos base: fondo, tipografía y que la página ocupe toda la pantalla */
@@ -36,6 +62,11 @@ html, body{
   background: var(--bg);
   color: var(--ink);
   font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+}
+
+/* Transiciones suaves al cambiar de tema */
+body, header, .categorias, .barra-frase, .mode-toggle, textarea, .pictograma, .btn, .btn-theme-toggle, .cat-chip, .frase-actual, .frase-chip {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
 /* body en columna para apilar header, contenido y barra inferior */
@@ -84,6 +115,38 @@ header{
   font-size:1.3rem;
 }
 
+/* Contenedor para alinear los controles del encabezado */
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* Botón del alternador de tema claro/oscuro */
+.btn-theme-toggle {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+}
+.btn-theme-toggle:hover {
+  transform: rotate(15deg) scale(1.08);
+  background: var(--bg);
+}
+.btn-theme-toggle:active {
+  transform: scale(0.95);
+}
+
 /* Interruptor tipo "píldora" para elegir entre modo Pictogramas y modo Escribir */
 .mode-toggle{
   display:flex;
@@ -105,10 +168,10 @@ header{
   cursor:pointer;
   color: var(--ink-soft);
 }
-/* Botón del modo activo se ve resaltado (fondo oscuro) */
+/* Botón del modo activo se ve resaltado */
 .mode-toggle button[aria-pressed="true"]{
   background: var(--ink);
-  color: #fff;
+  color: var(--bg);
 }
 
 /* ---------- Categorías (modo pictogramas) ---------- */
