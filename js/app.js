@@ -60,25 +60,28 @@ const PICTOGRAMAS = [
    audioUrl en cada objeto — esta función no cambia.
    ========================================================= */
 // Reproduce un audio grabado si existe; si no, recurre a la voz sintetizada del navegador
-function reproducirTexto(texto, audioUrl){
-  if (audioUrl){
+function reproducirTexto(texto, audioUrl) {
+  if (audioUrl) {
     const audio = new Audio(audioUrl);
     audio.play();
     return;
   }
+
   if (!('speechSynthesis' in window)){
     anunciar('El navegador no soporta voz por síntesis.');
     return;
   }
-  // Cancela cualquier lectura en curso para que no se superpongan dos voces
+
+  // Cancelar cualquier lectura en curso para que no se superpongan dos voces:
   window.speechSynthesis.cancel();
+
   const utterance = new SpeechSynthesisUtterance(texto);
   utterance.lang = 'es-ES';
   window.speechSynthesis.speak(utterance);
 }
 
 // Escribe un mensaje en la región "viva" para que lectores de pantalla lo anuncien
-function anunciar(mensaje){
+function anunciar(mensaje) {
   document.getElementById('anuncios').textContent = mensaje;
 }
 
@@ -86,14 +89,16 @@ function anunciar(mensaje){
    MODO: alternar entre pictogramas y texto
    ========================================================= */
 // Muestra la vista pictogramas o la vista texto, y actualiza los botones del interruptor
-function cambiarModo(modo){
+function cambiarModo(modo) {
   const esPictogramas = modo === 'pictogramas';
+
   document.getElementById('vista-pictogramas').hidden = !esPictogramas;
   document.getElementById('vista-texto').hidden = esPictogramas;
   document.getElementById('barra-frase').hidden = !esPictogramas;
   document.getElementById('btn-modo-pictogramas').setAttribute('aria-pressed', String(esPictogramas));
   document.getElementById('btn-modo-texto').setAttribute('aria-pressed', String(!esPictogramas));
-  if (!esPictogramas){
+
+  if (!esPictogramas) {
     document.getElementById('entrada-texto').focus();
   }
 }
@@ -101,11 +106,11 @@ function cambiarModo(modo){
 /* =========================================================
    MODO PICTOGRAMAS
    ========================================================= */
-let categoriaActiva = 'personas'; // categoría seleccionada actualmente en los chips
-let frase = [];                   // lista de pictogramas que el usuario va tocando, en orden
+let categoriaActiva = 'personas';  // Categoría seleccionada actualmente en los chips.
+let frase = [];                    // Lista de pictogramas que el usuario va tocando, en orden.
 
-// Dibuja los chips de categorías; resalta el que coincide con categoriaActiva
-function renderCategorias(){
+// Dibuja los chips de categorías; resalta el que coincide con categoriaActiva:
+function renderCategorias() {
   const cont = document.getElementById('lista-categorias');
   cont.innerHTML = '';
   CATEGORIAS.forEach(cat => {
@@ -115,14 +120,15 @@ function renderCategorias(){
     btn.style.background = cat.color;
     btn.style.color = cat.colorInk;
     btn.textContent = cat.nombre;
-    // Al hacer clic, cambia la categoría activa y vuelve a dibujar chips + grilla
+
+    // Al hacer clic, cambia la categoría activa y vuelve a dibujar chips + grilla:
     btn.onclick = () => { categoriaActiva = cat.id; renderCategorias(); renderGrid(); };
     cont.appendChild(btn);
   });
 }
 
 // Dibuja la grilla de pictogramas filtrando solo los de la categoría activa
-function renderGrid(){
+function renderGrid() {
   const grid = document.getElementById('grid-pictogramas');
   grid.innerHTML = '';
   const cat = CATEGORIAS.find(c => c.id === categoriaActiva);
@@ -144,14 +150,14 @@ function renderGrid(){
 }
 
 // Al tocar un pictograma: se agrega a la frase, se refresca la barra inferior y se dice en voz alta
-function tocarPictograma(p){
+function tocarPictograma(p) {
   frase.push(p);
   renderFrase();
   reproducirTexto(p.palabra, p.audioUrl);
 }
 
 // Vuelve a dibujar los chips de palabras de la frase actual en la barra inferior
-function renderFrase(){
+function renderFrase() {
   const cont = document.getElementById('frase-actual');
   cont.innerHTML = '';
   frase.forEach(p => {
@@ -163,7 +169,7 @@ function renderFrase(){
 }
 
 // Vacía la frase construida y avisa el cambio a los lectores de pantalla
-function limpiarFrase(){
+function limpiarFrase() {
   frase = [];
   renderFrase();
   anunciar('Frase borrada');
@@ -171,34 +177,38 @@ function limpiarFrase(){
 
 // Determina la persona gramatical (yo/vos/el/nosotros/ellos) a partir
 // del primer pictograma de la frase, si es una persona conocida
-function obtenerSujeto(frase){
+function obtenerSujeto(frase) {
   const primero = frase[0];
   if (primero && primero.categoria === 'personas' && primero.persona){
     return primero.persona;
   }
+
   return 'el'; // sin sujeto explícito, se usa tercera persona por defecto
 }
 
 // Arma la frase para hablar: conjuga solo el primer verbo según el sujeto,
 // el resto de las palabras (incluidos otros verbos) quedan tal cual
-function construirFraseNatural(frase){
+function construirFraseNatural(frase) {
   const sujeto = obtenerSujeto(frase);
   let verboYaConjugado = false;
+
   return frase.map(p => {
     if (p.categoria === 'acciones' && !verboYaConjugado){
       verboYaConjugado = true;
       return (p.conjugaciones && p.conjugaciones[sujeto]) || p.palabra;
     }
+
     return p.palabra;
   }).join(' ');
 }
 
 // Une todas las palabras de la frase y las reproduce como una sola oración
-function hablarFrase(){
+function hablarFrase() {
   if (frase.length === 0){
     anunciar('No hay ninguna frase para reproducir');
     return;
   }
+
   const texto = construirFraseNatural(frase);
   reproducirTexto(texto, null);
 }
@@ -206,19 +216,30 @@ function hablarFrase(){
 /* =========================================================
    MODO TEXTO
    ========================================================= */
-// Engancha el textarea del modo texto: Enter (sin Shift) reproduce en voz alta lo escrito,
-// sin insertar un salto de línea
-function iniciarModoTexto(){
+function iniciarModoTexto() {
   const entradaTexto = document.getElementById('entrada-texto');
+  const btnHablar = document.querySelector('.btn-hablar');
+
+  // Helper function to read the textarea and speak:s
+  function hablar() {
+    const texto = entradaTexto.value.trim();
+    if (texto) {
+      reproducirTexto(texto, null);
+    }
+  }
+
+  // Speak when pressing Enter (without Shift)
   entradaTexto.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Enter' && !evento.shiftKey){
+    if (evento.key === 'Enter' && !evento.shiftKey) {
       evento.preventDefault();
-      const texto = entradaTexto.value.trim();
-      if (texto){
-        reproducirTexto(texto, null);
-      }
+      hablar();
     }
   });
+
+  // Speak when clicking the "Hablar" button:
+  if (btnHablar) {
+    btnHablar.addEventListener('click', hablar);
+  }
 }
 
 /* =========================================================
@@ -232,7 +253,9 @@ function iniciarTema() {
     if (tema === 'dark') {
       btnThemeToggle.textContent = '🌙';
       btnThemeToggle.setAttribute('aria-label', 'Cambiar a modo claro');
-    } else {
+    }
+
+    else {
       btnThemeToggle.textContent = '☀️';
       btnThemeToggle.setAttribute('aria-label', 'Cambiar a modo oscuro');
     }

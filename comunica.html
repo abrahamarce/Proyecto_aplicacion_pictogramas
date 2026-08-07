@@ -539,10 +539,12 @@
         audio.play();
         return;
       }
+
       if (!('speechSynthesis' in window)) {
         anunciar('El navegador no soporta voz por síntesis.');
         return;
       }
+
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(texto);
       utterance.lang = 'es-ES';
@@ -563,6 +565,7 @@
       document.getElementById('barra-frase').hidden = !esPictogramas;
       document.getElementById('btn-modo-pictogramas').setAttribute('aria-pressed', String(esPictogramas));
       document.getElementById('btn-modo-texto').setAttribute('aria-pressed', String(!esPictogramas));
+
       if (!esPictogramas) {
         document.getElementById('entrada-texto').focus();
       }
@@ -641,6 +644,7 @@
         anunciar('No hay ninguna frase para reproducir');
         return;
       }
+
       const texto = frase.map(p => p.palabra).join(' ');
       reproducirTexto(texto, null); // frase completa siempre por síntesis (combinación libre)
     }

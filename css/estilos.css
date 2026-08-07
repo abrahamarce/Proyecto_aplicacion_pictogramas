@@ -156,7 +156,8 @@ header{
   padding: 4px;
   gap:4px;
 }
-.mode-toggle button{
+
+.mode-toggle button {
   border:none;
   background:transparent;
   font-family:inherit;
@@ -168,6 +169,7 @@ header{
   cursor:pointer;
   color: var(--ink-soft);
 }
+
 /* Botón del modo activo se ve resaltado */
 .mode-toggle button[aria-pressed="true"]{
   background: var(--ink);
@@ -183,6 +185,7 @@ header{
   overflow-x:auto;
   background: var(--bg);
 }
+
 /* Chip de categoría: se ve atenuado si no está seleccionado */
 .cat-chip{
   flex: 0 0 auto;
@@ -200,6 +203,7 @@ header{
   border: 3px solid transparent;
   opacity:0.55;
 }
+
 /* Categoría activa: totalmente opaca y con borde marcado */
 .cat-chip[aria-pressed="true"]{
   opacity:1;
@@ -237,6 +241,7 @@ main{
   font-family:inherit;
   box-shadow: 0 2px 0 rgba(0,0,0,0.08);
 }
+
 /* Efecto de "presionado" al tocar el pictograma */
 .pictograma:active{ transform: translateY(2px); box-shadow:none; }
 .pictograma .emoji{ font-size: 2.4rem; line-height:1; }
@@ -249,6 +254,7 @@ main{
 .pictograma .palabra{ font-weight:700; font-size:1rem; text-align:center; }
 
 /* ---------- Modo texto ---------- */
+
 /* Contenedor del formulario de escritura libre */
 .modo-texto{
   display:flex;
@@ -256,12 +262,14 @@ main{
   gap:14px;
   flex:1;
 }
+
 .modo-texto label{
   font-weight:700;
   font-size:1.1rem;
 }
+
 /* Cuadro de texto grande donde el usuario escribe lo que quiere decir */
-.modo-texto textarea{
+.modo-texto textarea {
   flex:1;
   min-height: 180px;
   font-family:inherit;
@@ -273,6 +281,7 @@ main{
   color: var(--ink);
   resize: vertical;
 }
+
 .ayuda-texto{
   color: var(--ink-soft);
   font-size:0.95rem;
@@ -288,6 +297,7 @@ main{
   align-items:center;
   gap:12px;
 }
+
 /* Caja donde se van mostrando los "chips" de palabras de la frase */
 .frase-actual{
   flex:1;
@@ -300,12 +310,14 @@ main{
   align-items:center;
   gap:8px;
 }
+
 /* Texto de ayuda que aparece solo cuando todavía no hay ninguna palabra */
 .frase-actual:empty::before{
   content: "Toca pictogramas para armar una frase…";
   color: var(--ink-soft);
   font-style: italic;
 }
+
 /* Cada palabra ya agregada a la frase se muestra como una píldora */
 .frase-chip{
   background: var(--bg);
@@ -316,7 +328,7 @@ main{
 }
 
 /* Estilo base compartido por los botones de acción (Borrar / Hablar) */
-.btn{
+.btn {
   font-family:inherit;
   font-weight:700;
   font-size:1.05rem;
@@ -331,12 +343,14 @@ main{
   justify-content:center;
   gap:8px;
 }
-.btn-hablar{
+
+.btn-hablar {
   background: var(--primary);
   color: var(--primary-ink);
   font-size:1.2rem;
 }
-.btn-limpiar{
+
+.btn-limpiar {
   background: var(--bg);
   color: var(--ink);
   border: 2px solid var(--line);
@@ -358,4 +372,10 @@ main{
   .brand span:last-child{ display:none; }
   .grid-pictogramas{ grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
   .pictograma{ min-height:100px; }
+}
+
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  width: 100%;
 }
