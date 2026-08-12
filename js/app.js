@@ -55,6 +55,94 @@ const PICTOGRAMAS = [
 ];
 
 /* =========================================================
+   FRASES GUARDADAS: cuenta cuántas veces se dice cada frase
+   completa y guarda las más repetidas como accesos rápidos
+   ========================================================= */
+const CLAVE_FRASES_GUARDADAS = 'comunica_frases_guardadas';
+const UMBRAL_MINIMO_FRASE = 3; // veces mínimas dicha para aparecer como rápida
+const MAX_FRASES_RAPIDAS = 6;
+
+function cargarFrasesGuardadas(){
+  try{
+    return JSON.parse(localStorage.getItem(CLAVE_FRASES_GUARDADAS)) || [];
+  } catch { return []; }
+}
+
+// Guarda la frase dicha (texto natural + ids originales) y suma su contador
+function registrarFraseUsada(listaPictogramas, textoNatural){
+  if (listaPictogramas.length === 0) return;
+  const clave = listaPictogramas.map(p => p.id).join(',');
+  const frases = cargarFrasesGuardadas();
+  const existente = frases.find(f => f.clave === clave);
+  if (existente){
+    existente.veces += 1;
+  } else {
+    frases.push({ clave, texto: textoNatural, veces: 1 });
+  }
+  localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
+}
+
+// Igual que registrarFraseUsada, pero para texto libre escrito en el modo Escribir
+// (usa el propio texto normalizado como clave, ya que no hay pictogramas)
+function registrarTextoUsado(texto){
+  const limpio = texto.trim();
+  if (!limpio) return;
+  const clave = 'texto:' + limpio.toLowerCase();
+  const frases = cargarFrasesGuardadas();
+  const existente = frases.find(f => f.clave === clave);
+  if (existente){
+    existente.veces += 1;
+  } else {
+    frases.push({ clave, texto: limpio, veces: 1 });
+  }
+  localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
+}
+
+// Devuelve las frases que ya alcanzaron el mínimo de repeticiones, de más a menos usadas
+function obtenerFrasesFavoritas(){
+  return cargarFrasesGuardadas()
+    .filter(f => f.veces >= UMBRAL_MINIMO_FRASE)
+    .sort((a, b) => b.veces - a.veces)
+    .slice(0, MAX_FRASES_RAPIDAS);
+}
+
+// Dibuja los chips de frases rápidas; oculta la fila entera si todavía no hay ninguna
+function renderFrasesRapidas(){
+  const cont = document.getElementById('frases-rapidas');
+  const favoritas = obtenerFrasesFavoritas();
+  cont.innerHTML = '';
+  cont.hidden = favoritas.length === 0;
+  favoritas.forEach(f => {
+    const chip = document.createElement('span');
+    chip.className = 'frase-rapida-chip';
+
+    const btnDecir = document.createElement('button');
+    btnDecir.className = 'frase-rapida-texto';
+    btnDecir.textContent = `🔁 ${f.texto}`;
+    btnDecir.setAttribute('aria-label', `Decir de nuevo: ${f.texto}`);
+    btnDecir.onclick = () => reproducirTexto(f.texto, null);
+
+    const btnBorrar = document.createElement('button');
+    btnBorrar.className = 'frase-rapida-borrar';
+    btnBorrar.textContent = '✕';
+    btnBorrar.setAttribute('aria-label', `Quitar frase guardada: ${f.texto}`);
+    btnBorrar.onclick = () => eliminarFraseGuardada(f.clave);
+
+    chip.appendChild(btnDecir);
+    chip.appendChild(btnBorrar);
+    cont.appendChild(chip);
+  });
+}
+
+// Quita una frase guardada por su clave y vuelve a dibujar los chips
+function eliminarFraseGuardada(clave){
+  const frases = cargarFrasesGuardadas().filter(f => f.clave !== clave);
+  localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
+  renderFrasesRapidas();
+  anunciar('Frase guardada eliminada');
+}
+
+/* =========================================================
    AUDIO: función única que abstrae la fuente del sonido.
    Cuando lleguen los audios grabados, solo hay que llenar
    audioUrl en cada objeto — esta función no cambia.
@@ -203,15 +291,16 @@ function construirFraseNatural(frase) {
 }
 
 // Une todas las palabras de la frase y las reproduce como una sola oración
-function hablarFrase() {
+function hablarFrase(){
   if (frase.length === 0){
     anunciar('No hay ninguna frase para reproducir');
     return;
   }
-
   const texto = construirFraseNatural(frase);
   reproducirTexto(texto, null);
-} 
+  registrarFraseUsada(frase, texto);
+  renderFrasesRapidas();
+}
 
 /* =========================================================
    MODO TEXTO
@@ -220,11 +309,13 @@ function iniciarModoTexto() {
   const entradaTexto = document.getElementById('entrada-texto');
   const btnHablar = document.querySelector('.btn-hablar');
 
-  // Helper function to read the textarea and speak:s
+ // Helper function to read the textarea and speak:s
   function hablar() {
     const texto = entradaTexto.value.trim();
     if (texto) {
       reproducirTexto(texto, null);
+      registrarTextoUsado(texto);
+      renderFrasesRapidas();
     }
   }
 
@@ -283,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderGrid();
   iniciarModoTexto();
   iniciarTema();
+  renderFrasesRapidas();
 });
 
 
