@@ -10,6 +10,19 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E8871E">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+  // Script de bloqueo para evitar destello blanco del tema al cargar
+  (function() {
+    const temaGuardado = localStorage.getItem('theme');
+    if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -20,12 +33,17 @@
     <span>Comunica</span>
   </div>
 
-  <div class="mode-toggle" role="group" aria-label="Elegir modo de comunicación">
-    <button id="btn-modo-pictogramas" aria-pressed="true" onclick="cambiarModo('pictogramas')">
-      🖼️ Pictogramas
-    </button>
-    <button id="btn-modo-texto" aria-pressed="false" onclick="cambiarModo('texto')">
-      ⌨️ Escribir
+  <div class="header-actions">
+    <div class="mode-toggle" role="group" aria-label="Elegir modo de comunicación">
+      <button id="btn-modo-pictogramas" aria-pressed="true" onclick="cambiarModo('pictogramas')">
+        🖼️ Pictogramas
+      </button>
+      <button id="btn-modo-texto" aria-pressed="false" onclick="cambiarModo('texto')">
+        ⌨️ Escribir
+      </button>
+    </div>
+    <button id="btn-theme-toggle" class="btn-theme-toggle" aria-label="Cambiar tema (claro/oscuro)">
+      ☀️ Tema
     </button>
   </div>
 </header>
@@ -42,10 +60,11 @@
 <div id="vista-texto" hidden>
   <main>
     <div class="modo-texto">
-      <label for="entrada-texto">Escribí lo que querés decir</label>
+      <label for="entrada-texto">Escribe lo que quieres decir:</label>
       <textarea id="entrada-texto" placeholder="Escribí aquí…" aria-describedby="ayuda-texto"></textarea>
       <p id="ayuda-texto" class="ayuda-texto">Presioná Enter o el botón "Hablar" para escuchar el texto en voz alta.</p>
     </div>
+    <button class="btn btn-hablar" onclick="" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
   </main>
 </div>
 
@@ -61,5 +80,10 @@
 
 <!-- Toda la lógica de la app vive en js/app.js -->
 <script src="js/app.js"></script>
+
+<footer>
+  <p>&copy; TCU-748 2026</p>
+</footer>
+
 </body>
 </html>
