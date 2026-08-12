@@ -201,7 +201,7 @@ function hablarFrase(){
   }
   const texto = construirFraseNatural(frase);
   reproducirTexto(texto, null);
-}
+} 
 
 /* =========================================================
    MODO TEXTO
