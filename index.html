@@ -68,12 +68,14 @@
       <p id="ayuda-texto" class="ayuda-texto">Presioná Enter o el botón "Hablar" para escuchar el texto en voz alta.</p>
     </div>
     <button class="btn btn-hablar" onclick="" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
+    <button class="btn btn-favorito" onclick="favoritearTextoActual()" aria-label="Guardar texto como favorito">⭐ Favorita</button>
   </main>
 </div>
 
 <!-- BARRA INFERIOR (solo visible en modo pictogramas): frase armada y botones de acción -->
 <div class="barra-frase" id="barra-frase">
   <div class="frase-actual" id="frase-actual" role="status" aria-live="polite" aria-label="Frase construida"></div>
+  <button class="btn btn-favorito" onclick="favoritearFraseActual()" aria-label="Guardar frase como favorita">⭐ Favorita</button>
   <button class="btn btn-limpiar" onclick="limpiarFrase()" aria-label="Borrar frase">🗑️ Borrar</button>
   <button class="btn btn-hablar" onclick="hablarFrase()" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
 </div>

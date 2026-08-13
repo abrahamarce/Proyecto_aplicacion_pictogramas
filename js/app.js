@@ -98,10 +98,48 @@ function registrarTextoUsado(texto){
   localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
 }
 
-// Devuelve las frases que ya alcanzaron el mínimo de repeticiones, de más a menos usadas
+// Guarda una frase directo como favorita manual, sin importar cuántas veces se dijo
+function marcarComoFavoritaManual(clave, texto){
+  const frases = cargarFrasesGuardadas();
+  const existente = frases.find(f => f.clave === clave);
+  if (existente){
+    existente.manual = true;
+  } else {
+    frases.push({ clave, texto, veces: 1, manual: true });
+  }
+  localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
+  renderFrasesRapidas();
+  anunciar('Frase agregada a favoritos');
+}
+
+// Se activa con el botón ⭐ en modo pictogramas
+function favoritearFraseActual(){
+  if (frase.length === 0){
+    anunciar('No hay ninguna frase para guardar');
+    return;
+  }
+  const clave = frase.map(p => p.id).join(',');
+  const texto = construirFraseNatural(frase);
+  marcarComoFavoritaManual(clave, texto);
+}
+
+// Se activa con el botón ⭐ en modo escribir
+function favoritearTextoActual(){
+  const entradaTexto = document.getElementById('entrada-texto');
+  const texto = entradaTexto.value.trim();
+  if (!texto){
+    anunciar('Escribí algo primero para guardarlo como favorito');
+    return;
+  }
+  const clave = 'texto:' + texto.toLowerCase();
+  marcarComoFavoritaManual(clave, texto);
+}
+
+// Devuelve las frases que ya alcanzaron el mínimo de repeticiones, O que fueron
+// marcadas manualmente como favoritas, de más a menos usadas
 function obtenerFrasesFavoritas(){
   return cargarFrasesGuardadas()
-    .filter(f => f.veces >= UMBRAL_MINIMO_FRASE)
+    .filter(f => f.veces >= UMBRAL_MINIMO_FRASE || f.manual)
     .sort((a, b) => b.veces - a.veces)
     .slice(0, MAX_FRASES_RAPIDAS);
 }
