@@ -422,7 +422,10 @@ footer {
 .frase-rapida-borrar:active{ background: var(--line); }
 .btn-favorito{
   background: var(--surface);
-  color: var(--primary-ink);
+  color: var(--ink);
   border: 2px solid var(--primary);
 }
-.btn-favorito:active{ background: var(--primary); }
+.btn-favorito:active{
+  background: var(--primary);
+  color: var(--primary-ink);
+}
