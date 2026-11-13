@@ -181,29 +181,138 @@ function eliminarFraseGuardada(clave){
 }
 
 /* =========================================================
-   AUDIO: función única que abstrae la fuente del sonido.
-   Cuando lleguen los audios grabados, solo hay que llenar
-   audioUrl en cada objeto — esta función no cambia.
+   VOZ: dice un texto en voz alta. Usa el audio del paquete de
+   voz si lo tiene; si no, usa la voz del navegador (speechSynthesis).
+   Un paquete de voz es una carpeta con un voz.json y los audios,
+   que se descarga al dispositivo (ver instalarPaqueteDeVoz).
    ========================================================= */
-// Reproduce un audio grabado si existe; si no, recurre a la voz sintetizada del navegador
-function reproducirTexto(texto, audioUrl) {
-  if (audioUrl) {
-    const audio = new Audio(audioUrl);
-    audio.play();
-    return;
+const CACHE_PAQUETE = 'voz-paquete';              // "cajón" del navegador donde se guardan los audios
+const CLAVE_VOZ_ACTIVA = 'comunica_voz_activa';   // en localStorage: qué paquete está instalado
+
+let audioActual = null;   // el audio que está sonando ahora
+let urlActual = null;     // dirección temporal de ese audio (se libera al frenarlo)
+let turnoDeVoz = 0;       // si tocan rápido varias veces, solo suena la última orden
+
+// Convierte un texto en la "clave" con la que se busca su audio:
+// minúsculas, sin ¿ ? ¡ ! . , ; y con espacios simples.
+// Tiene que dar lo mismo que la columna "clave" de textos_a_sintetizar.csv.
+function claveDeFrase(texto){
+  return texto.normalize('NFC').toLowerCase()
+    .replace(/[¿?¡!.,;]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Lee de localStorage qué paquete de voz está instalado (o null si ninguno)
+function cargarVozActiva(){
+  try{
+    return JSON.parse(localStorage.getItem(CLAVE_VOZ_ACTIVA));
+  } catch { return null; }
+}
+
+// Si el paquete instalado tiene un audio para ese texto, devuelve su dirección; si no, null
+function direccionDelClip(texto){
+  const voz = cargarVozActiva();
+  if (!voz || !voz.clips) return null;
+  const clave = claveDeFrase(texto);
+  if (!Object.prototype.hasOwnProperty.call(voz.clips, clave)) return null;
+  return new URL(voz.clips[clave], voz.urlBase).href;
+}
+
+// Descarga un paquete de voz y guarda todos sus audios en el dispositivo,
+// para que después suenen sin internet.
+// Ejemplo (desde la consola del navegador):  instalarPaqueteDeVoz('voz-prueba/')
+async function instalarPaqueteDeVoz(carpeta){
+  const urlBase = new URL(carpeta.endsWith('/') ? carpeta : carpeta + '/', location.href).href;
+
+  const respuesta = await fetch(urlBase + 'voz.json', { cache: 'no-store' });
+  if (!respuesta.ok) throw new Error('No se encontró voz.json en ' + urlBase);
+  const paquete = await respuesta.json();
+
+  const cache = await caches.open(CACHE_PAQUETE);
+  for (const archivo of Object.values(paquete.clips)){
+    await cache.add(new URL(archivo, urlBase).href);
   }
 
+  // Recién cuando se bajó todo, se marca el paquete como instalado
+  localStorage.setItem(CLAVE_VOZ_ACTIVA, JSON.stringify({
+    nombre: paquete.nombre || 'Voz',
+    urlBase: urlBase,
+    clips: paquete.clips
+  }));
+  anunciar('Voz instalada: ' + (paquete.nombre || 'Voz'));
+  return Object.keys(paquete.clips).length;
+}
+
+// Lee un audio guardado en el dispositivo (o lo baja si por alguna razón no está)
+async function obtenerAudioGuardado(direccion){
+  if ('caches' in window){
+    const cache = await caches.open(CACHE_PAQUETE);
+    const guardado = await cache.match(direccion);
+    if (guardado) return guardado.blob();
+  }
+  const respuesta = await fetch(direccion);
+  if (!respuesta.ok) throw new Error('No se pudo obtener ' + direccion);
+  return respuesta.blob();
+}
+
+// Frena cualquier audio o voz que esté sonando
+function detenerAudio(){
+  if (audioActual){
+    audioActual.pause();
+    audioActual = null;
+  }
+  if (urlActual){
+    URL.revokeObjectURL(urlActual);
+    urlActual = null;
+  }
+  if ('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+  }
+}
+
+// Reproduce un audio ya leído
+async function reproducirBlob(blob){
+  urlActual = URL.createObjectURL(blob);
+  audioActual = new Audio(urlActual);
+  await audioActual.play();
+}
+
+// La voz del navegador: el respaldo cuando no hay un audio grabado para ese texto
+function hablarConNavegador(texto){
   if (!('speechSynthesis' in window)){
     anunciar('El navegador no soporta voz por síntesis.');
     return;
   }
-
-  // Cancelar cualquier lectura en curso para que no se superpongan dos voces:
-  window.speechSynthesis.cancel();
-
   const utterance = new SpeechSynthesisUtterance(texto);
   utterance.lang = 'es-ES';
   window.speechSynthesis.speak(utterance);
+}
+
+// Dice un texto en voz alta. Orden de prioridad:
+//   1) audioUrl, si se indica uno (como antes)
+//   2) el audio del paquete de voz instalado, si tiene ese texto
+//   3) la voz del navegador
+async function reproducirTexto(texto, audioUrl){
+  const miTurno = ++turnoDeVoz;   // si llega una orden más nueva, esta se descarta
+  detenerAudio();
+
+  const direccion = audioUrl || direccionDelClip(texto);
+  if (!direccion){
+    hablarConNavegador(texto);    // igual que antes de existir el paquete de voz
+    return;
+  }
+
+  try {
+    const blob = await obtenerAudioGuardado(direccion);
+    if (miTurno !== turnoDeVoz) return;
+    await reproducirBlob(blob);
+  } catch (error) {
+    if (miTurno === turnoDeVoz){
+      console.warn('No se pudo usar el audio grabado; se usa la voz del navegador.', error);
+      hablarConNavegador(texto);
+    }
+  }
 }
 
 // Escribe un mensaje en la región "viva" para que lectores de pantalla lo anuncien
