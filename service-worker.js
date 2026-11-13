@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = 'comunica-v3';
+const NOMBRE_CACHE = 'comunica-v4';
 
 const ARCHIVOS_A_GUARDAR = [
   './',
@@ -48,7 +48,7 @@ self.addEventListener('install', (evento) => {
 // Si existe una copia guardada, la usa. Si no, va a buscarlo a internet.
 self.addEventListener('fetch', (evento) => {
   evento.respondWith(
-    caches.match(evento.request).then((respuestaGuardada) => {
+    caches.match(evento.request, { cacheName: NOMBRE_CACHE }).then((respuestaGuardada) => {
       return respuestaGuardada || fetch(evento.request);
     })
   );
@@ -61,7 +61,7 @@ self.addEventListener('activate', (evento) => {
     caches.keys().then((nombresGuardados) => {
       return Promise.all(
         nombresGuardados
-          .filter((nombre) => nombre !== NOMBRE_CACHE)
+          .filter((nombre) => /^comunica-v\d+$/.test(nombre) && nombre !== NOMBRE_CACHE)
           .map((nombre) => caches.delete(nombre))
       );
     })
