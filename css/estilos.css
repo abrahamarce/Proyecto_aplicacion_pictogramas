@@ -226,6 +226,95 @@ main{
   gap:12px;
 }
 
+.acciones-pictogramas{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.pictograma-contenedor{
+  position:relative;
+  min-width:0;
+}
+
+.pictograma-contenedor .pictograma{
+  width:100%;
+  height:100%;
+}
+
+.btn-eliminar-pictograma{
+  position:absolute;
+  top:4px;
+  right:4px;
+  width:36px;
+  height:36px;
+  border:2px solid var(--ink);
+  border-radius:50%;
+  background:var(--bg);
+  cursor:pointer;
+  font-size:1rem;
+}
+
+#dialogo-pictograma{
+  width:min(92vw, 460px);
+  max-height:90vh;
+  padding:0;
+  border:2px solid var(--ink);
+  border-radius:var(--radius);
+  background:var(--bg);
+  color:var(--ink);
+}
+
+#dialogo-pictograma::backdrop{
+  background:rgba(0, 0, 0, 0.55);
+}
+
+.form-pictograma{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:20px;
+}
+
+.form-pictograma h2{
+  margin:0 0 4px;
+  font-size:1.35rem;
+}
+
+.form-pictograma label{
+  font-weight:700;
+}
+
+.form-pictograma input,
+.form-pictograma select{
+  min-height:48px;
+  padding:8px;
+  border:2px solid var(--ink-soft);
+  border-radius:var(--radius);
+  background:var(--bg);
+  color:var(--ink);
+  font:inherit;
+}
+
+.ayuda-pictograma{
+  margin:0;
+  color:var(--ink-soft);
+  font-size:0.9rem;
+}
+
+.error-pictograma{
+  margin:0;
+  color:var(--ink);
+  font-weight:700;
+}
+
+.acciones-form-pictograma{
+  display:flex;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:8px;
+}
+
 /* Botón individual de pictograma (emoji + palabra) */
 .pictograma{
   border: none;

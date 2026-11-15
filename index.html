@@ -55,9 +55,30 @@
   <nav class="categorias" id="lista-categorias" aria-label="Categorías de pictogramas"></nav>
 
   <main>
+    <div class="acciones-pictogramas">
+      <button class="btn" id="btn-crear-pictograma" type="button">➕ Crear pictograma</button>
+    </div>
     <div class="grid-pictogramas" id="grid-pictogramas" role="list" aria-label="Pictogramas disponibles"></div>
   </main>
 </div>
+
+<dialog id="dialogo-pictograma" aria-labelledby="titulo-dialogo-pictograma">
+  <form id="form-pictograma" class="form-pictograma">
+    <h2 id="titulo-dialogo-pictograma">Crear pictograma</h2>
+    <label for="palabra-pictograma">Texto</label>
+    <input id="palabra-pictograma" name="palabra" type="text" maxlength="60" required autocomplete="off">
+    <label for="categoria-pictograma">Categoría</label>
+    <select id="categoria-pictograma" name="categoria" required></select>
+    <label for="imagen-pictograma">Foto</label>
+    <input id="imagen-pictograma" name="imagen" type="file" accept="image/jpeg,image/png,image/webp" required>
+    <p class="ayuda-pictograma">JPG, PNG o WebP; máximo 10 MB.</p>
+    <p id="error-pictograma" class="error-pictograma" role="alert" hidden></p>
+    <div class="acciones-form-pictograma">
+      <button class="btn" id="btn-cancelar-pictograma" type="button">Cancelar</button>
+      <button class="btn btn-hablar" type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- MODO TEXTO: oculto por defecto (atributo "hidden"), se muestra al cambiar de modo -->
 <div id="vista-texto" hidden>

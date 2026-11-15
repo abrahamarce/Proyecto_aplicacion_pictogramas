@@ -20,6 +20,12 @@ También está la opción de escribir, en la cuál el usuario puede escribir las
 ![ejemplo_yo](Imagenes_readme/escribir.jpg)
 
 
+## Pictogramas personalizados
+
+Desde la vista **Pictogramas**, selecciona **Crear pictograma** para añadir una foto, un texto y una categoría. Las imágenes se redimensionan y comprimen al guardarse. Los pictogramas personalizados se almacenan en el dispositivo y están disponibles sin conexión; cada uno puede eliminarse desde su tarjeta.
+
+El catálogo incluido con la aplicación permanece disponible por defecto. Los pictogramas personalizados no se sincronizan entre dispositivos y pueden perderse si se borran los datos del navegador.
+
 ## **Sobre el código**
 
 # manifest.json

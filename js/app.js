@@ -54,6 +54,126 @@ const PICTOGRAMAS = [
   { id:'p053', palabra:'no',        categoria:'social',      imagen:'pictogramas/no.png',     emoji:'🚫', audioUrl:null },
 ];
 
+const NOMBRE_BD_PICTOGRAMAS = 'comunica-pictogramas';
+const VERSION_BD_PICTOGRAMAS = 1;
+const MAX_BYTES_IMAGEN = 10 * 1024 * 1024;
+const MAX_LADO_IMAGEN = 512;
+
+let baseDatosPictogramasPromise;
+let pictogramasPersonalizados = [];
+
+const urlsImagenesPersonalizadas = new Map();
+
+function abrirBaseDatosPictogramas(){
+  if (!('indexedDB' in window)) return Promise.reject(new Error('Este navegador no permite guardar pictogramas en el dispositivo.'));
+
+  if (!baseDatosPictogramasPromise){
+    baseDatosPictogramasPromise = new Promise((resolve, reject) => {
+      const solicitud = indexedDB.open(NOMBRE_BD_PICTOGRAMAS, VERSION_BD_PICTOGRAMAS);
+
+      solicitud.onupgradeneeded = () => {
+        if (!solicitud.result.objectStoreNames.contains('pictogramas')){
+          solicitud.result.createObjectStore('pictogramas', { keyPath: 'id' });
+        }
+      };
+
+      solicitud.onsuccess = () => resolve(solicitud.result);
+      solicitud.onerror = () => reject(solicitud.error || new Error('No se pudo abrir el almacenamiento local.'));
+    });
+  }
+  return baseDatosPictogramasPromise;
+}
+
+async function obtenerPictogramasPersonalizados(){
+  const db = await abrirBaseDatosPictogramas();
+
+  return new Promise((resolve, reject) => {
+    const solicitud = db.transaction('pictogramas', 'readonly').objectStore('pictogramas').getAll();
+    solicitud.onsuccess = () => resolve(solicitud.result);
+    solicitud.onerror = () => reject(solicitud.error || new Error('No se pudieron cargar los pictogramas.'));
+  });
+}
+
+async function guardarPictogramaPersonalizado(pictograma){
+  const db = await abrirBaseDatosPictogramas();
+
+  return new Promise((resolve, reject) => {
+    const transaccion = db.transaction('pictogramas', 'readwrite');
+    transaccion.objectStore('pictogramas').put(pictograma);
+    transaccion.oncomplete = () => resolve();
+    transaccion.onerror = () => reject(transaccion.error || new Error('No se pudo guardar el pictograma.'));
+    transaccion.onabort = () => reject(transaccion.error || new Error('No se pudo guardar el pictograma.'));
+  });
+}
+
+async function borrarPictogramaPersonalizado(id){
+  const db = await abrirBaseDatosPictogramas();
+
+  return new Promise((resolve, reject) => {
+    const transaccion = db.transaction('pictogramas', 'readwrite');
+    transaccion.objectStore('pictogramas').delete(id);
+    transaccion.oncomplete = () => resolve();
+    transaccion.onerror = () => reject(transaccion.error || new Error('No se pudo eliminar el pictograma.'));
+    transaccion.onabort = () => reject(transaccion.error || new Error('No se pudo eliminar el pictograma.'));
+  });
+}
+
+async function comprimirImagen(file) {
+  const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+
+  if (!tiposPermitidos.includes(file.type)) throw new Error('Seleccioná una imagen JPG, PNG o WebP.');
+  if (file.size > MAX_BYTES_IMAGEN) throw new Error('La imagen debe pesar 10 MB o menos.');
+
+  let bitmap;
+
+  try {
+    bitmap = await createImageBitmap(file);
+
+  }
+
+  catch {
+    throw new Error('No se pudo leer la imagen seleccionada.');
+  }
+
+  const escala = Math.min(1, MAX_LADO_IMAGEN / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * escala));
+  canvas.height = Math.max(1, Math.round(bitmap.height * escala));
+  const contexto = canvas.getContext('2d');
+
+  if (!contexto){
+    bitmap.close();
+    throw new Error('No se pudo preparar la imagen.');
+  }
+
+  contexto.fillStyle = '#fff';
+  contexto.fillRect(0, 0, canvas.width, canvas.height);
+  contexto.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+  bitmap.close();
+
+  const convertir = tipo => new Promise(resolve => canvas.toBlob(resolve, tipo, 0.82));
+  const webp = await convertir('image/webp');
+
+  if (webp && webp.type === 'image/webp') return webp;
+
+  const jpeg = await convertir('image/jpeg');
+
+  if (!jpeg) throw new Error('No se pudo comprimir la imagen.');
+
+  return jpeg;
+}
+
+function obtenerUrlImagen(pictograma) {
+  if (pictograma.imagen) return pictograma.imagen;
+
+  if (!urlsImagenesPersonalizadas.has(pictograma.id)) {
+    urlsImagenesPersonalizadas.set(pictograma.id, URL.createObjectURL(pictograma.imagenBlob));
+  }
+
+  return urlsImagenesPersonalizadas.get(pictograma.id);
+}
+
 /* =========================================================
    FRASES GUARDADAS: cuenta cuántas veces se dice cada frase
    completa y guarda las más repetidas como accesos rápidos
@@ -62,23 +182,30 @@ const CLAVE_FRASES_GUARDADAS = 'comunica_frases_guardadas';
 const UMBRAL_MINIMO_FRASE = 3; // veces mínimas dicha para aparecer como rápida
 const MAX_FRASES_RAPIDAS = 6;
 
-function cargarFrasesGuardadas(){
-  try{
+function cargarFrasesGuardadas() {
+  try {
     return JSON.parse(localStorage.getItem(CLAVE_FRASES_GUARDADAS)) || [];
-  } catch { return []; }
+  } 
+
+  catch { return []; }
 }
 
-// Guarda la frase dicha (texto natural + ids originales) y suma su contador
-function registrarFraseUsada(listaPictogramas, textoNatural){
+// Guarda la frase dicha (texto natural + IDs originales) y suma su contador:
+function registrarFraseUsada(listaPictogramas, textoNatural) {
   if (listaPictogramas.length === 0) return;
+
   const clave = listaPictogramas.map(p => p.id).join(',');
   const frases = cargarFrasesGuardadas();
   const existente = frases.find(f => f.clave === clave);
+
   if (existente){
     existente.veces += 1;
-  } else {
+  } 
+
+  else {
     frases.push({ clave, texto: textoNatural, veces: 1 });
   }
+
   localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
 }
 
@@ -86,15 +213,21 @@ function registrarFraseUsada(listaPictogramas, textoNatural){
 // (usa el propio texto normalizado como clave, ya que no hay pictogramas)
 function registrarTextoUsado(texto){
   const limpio = texto.trim();
+
   if (!limpio) return;
+
   const clave = 'texto:' + limpio.toLowerCase();
   const frases = cargarFrasesGuardadas();
   const existente = frases.find(f => f.clave === clave);
+
   if (existente){
     existente.veces += 1;
-  } else {
+  } 
+
+  else {
     frases.push({ clave, texto: limpio, veces: 1 });
   }
+
   localStorage.setItem(CLAVE_FRASES_GUARDADAS, JSON.stringify(frases));
 }
 
@@ -367,21 +500,129 @@ function renderGrid() {
   const grid = document.getElementById('grid-pictogramas');
   grid.innerHTML = '';
   const cat = CATEGORIAS.find(c => c.id === categoriaActiva);
-  PICTOGRAMAS.filter(p => p.categoria === categoriaActiva).forEach(p => {
+  PICTOGRAMAS.concat(pictogramasPersonalizados).filter(p => p.categoria === categoriaActiva).forEach(p => {
+    const elemento = document.createElement('div');
+    elemento.className = 'pictograma-contenedor';
+    elemento.setAttribute('role', 'listitem');
+
     const btn = document.createElement('button');
     btn.className = 'pictograma';
     btn.style.background = cat.color;
     btn.style.color = cat.colorInk;
-    btn.setAttribute('role', 'listitem');
     btn.setAttribute('aria-label', p.palabra);
-    const contenidoVisual = p.imagen
-  ? `<img class="pictograma-img" src="${p.imagen}" alt="">`
-  : `<span class="emoji" aria-hidden="true">${p.emoji}</span>`;
-
-  btn.innerHTML = `${contenidoVisual}<span class="palabra">${p.palabra}</span>`;
+    if (p.imagen || p.imagenBlob){
+      const imagen = document.createElement('img');
+      imagen.className = 'pictograma-img';
+      imagen.src = obtenerUrlImagen(p);
+      imagen.alt = '';
+      btn.appendChild(imagen);
+    } else {
+      const emoji = document.createElement('span');
+      emoji.className = 'emoji';
+      emoji.setAttribute('aria-hidden', 'true');
+      emoji.textContent = p.emoji;
+      btn.appendChild(emoji);
+    }
+    const palabra = document.createElement('span');
+    palabra.className = 'palabra';
+    palabra.textContent = p.palabra;
+    btn.appendChild(palabra);
     btn.onclick = () => tocarPictograma(p);
-    grid.appendChild(btn);
+    elemento.appendChild(btn);
+
+    if (p.personalizado){
+      const borrar = document.createElement('button');
+      borrar.className = 'btn-eliminar-pictograma';
+      borrar.type = 'button';
+      borrar.textContent = '🗑️';
+      borrar.setAttribute('aria-label', `Eliminar pictograma ${p.palabra}`);
+      borrar.onclick = () => eliminarPictograma(p);
+      elemento.appendChild(borrar);
+    }
+    grid.appendChild(elemento);
   });
+}
+
+async function eliminarPictograma(pictograma){
+  if (!window.confirm(`¿Querés eliminar el pictograma "${pictograma.palabra}"?`)) return;
+  try{
+    await borrarPictogramaPersonalizado(pictograma.id);
+    pictogramasPersonalizados = pictogramasPersonalizados.filter(p => p.id !== pictograma.id);
+    const url = urlsImagenesPersonalizadas.get(pictograma.id);
+    if (url) URL.revokeObjectURL(url);
+    urlsImagenesPersonalizadas.delete(pictograma.id);
+    frase = frase.filter(p => p.id !== pictograma.id);
+    renderGrid();
+    renderFrase();
+    anunciar('Pictograma eliminado');
+  } catch (error){
+    anunciar(error.message);
+  }
+}
+
+function iniciarPictogramasPersonalizados(){
+  const dialogo = document.getElementById('dialogo-pictograma');
+  const formulario = document.getElementById('form-pictograma');
+  const selectorCategoria = document.getElementById('categoria-pictograma');
+  const entradaPalabra = document.getElementById('palabra-pictograma');
+  const entradaImagen = document.getElementById('imagen-pictograma');
+  const mensajeError = document.getElementById('error-pictograma');
+  const botonGuardar = formulario.querySelector('[type="submit"]');
+
+  CATEGORIAS.forEach(cat => {
+    const opcion = document.createElement('option');
+    opcion.value = cat.id;
+    opcion.textContent = cat.nombre;
+    selectorCategoria.appendChild(opcion);
+  });
+
+  document.getElementById('btn-crear-pictograma').addEventListener('click', () => {
+    formulario.reset();
+    selectorCategoria.value = categoriaActiva;
+    mensajeError.hidden = true;
+    dialogo.showModal();
+    entradaPalabra.focus();
+  });
+  document.getElementById('btn-cancelar-pictograma').addEventListener('click', () => dialogo.close());
+
+  formulario.addEventListener('submit', async evento => {
+    evento.preventDefault();
+    mensajeError.hidden = true;
+    const archivo = entradaImagen.files[0];
+    if (!archivo) return;
+    botonGuardar.disabled = true;
+    try{
+      const imagenBlob = await comprimirImagen(archivo);
+      const pictograma = {
+        id: `custom-${crypto.randomUUID()}`,
+        palabra: entradaPalabra.value.trim(),
+        categoria: selectorCategoria.value,
+        imagenBlob,
+        personalizado: true,
+        audioUrl: null
+      };
+      if (!pictograma.palabra) throw new Error('Escribí el texto del pictograma.');
+      await guardarPictogramaPersonalizado(pictograma);
+      pictogramasPersonalizados.push(pictograma);
+      categoriaActiva = pictograma.categoria;
+      renderCategorias();
+      renderGrid();
+      dialogo.close();
+      anunciar('Pictograma creado');
+    } catch (error){
+      mensajeError.textContent = error.message || 'No se pudo guardar el pictograma.';
+      mensajeError.hidden = false;
+    } finally {
+      botonGuardar.disabled = false;
+    }
+  });
+
+  obtenerPictogramasPersonalizados()
+    .then(pictogramas => {
+      pictogramasPersonalizados = pictogramas;
+      renderGrid();
+    })
+    .catch(error => anunciar(error.message));
 }
 
 // Al tocar un pictograma: se agrega a la frase, se refresca la barra inferior y se dice en voz alta
@@ -519,6 +760,7 @@ function iniciarTema() {
 document.addEventListener('DOMContentLoaded', () => {
   renderCategorias();
   renderGrid();
+  iniciarPictogramasPersonalizados();
   iniciarModoTexto();
   iniciarTema();
   renderFrasesRapidas();
