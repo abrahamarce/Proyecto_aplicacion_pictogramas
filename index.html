@@ -65,6 +65,8 @@
     <div class="modo-texto">
       <label for="entrada-texto">Escribe lo que quieres decir:</label>
       <textarea id="entrada-texto" placeholder="Escribí aquí…" aria-describedby="ayuda-texto"></textarea>
+            <!-- Pictogramas de las palabras escritas: se dibujan en js/app.js (renderTextoPictogramas) -->
+      <div class="texto-pictogramas" id="texto-pictogramas" role="list" aria-label="Pictogramas de lo que escribiste"></div>
       <p id="ayuda-texto" class="ayuda-texto">Presioná Enter o el botón "Hablar" para escuchar el texto en voz alta.</p>
     </div>
     <button class="btn btn-hablar" onclick="" aria-label="Reproducir frase en voz alta">🔊 Hablar</button>
@@ -92,3 +94,4 @@
 
 </body>
 </html>
+    
