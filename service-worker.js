@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = 'comunica-v4';
+const NOMBRE_CACHE = 'comunica-v5';
 
 const ARCHIVOS_A_GUARDAR = [
   './',
