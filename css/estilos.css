@@ -287,6 +287,57 @@ main{
   font-size:0.95rem;
 }
 
+/* Pictogramas de lo escrito (modo Escribir).
+   --tam-picto se adapta al ancho de pantalla: ~72px en celulares, hasta 132px en tablets y computadoras. */
+.texto-pictogramas{
+  --tam-picto: clamp(72px, 14vw, 132px);
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  gap: clamp(8px, 1.5vw, 14px);
+}
+.texto-pictogramas:empty{ display:none; }
+
+.picto-texto{
+  width: var(--tam-picto);
+  border-radius: var(--radius);
+  padding: 8px 6px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+}
+.picto-texto .pictograma-img{
+  width:100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+.picto-texto .emoji{
+  font-size: calc(var(--tam-picto) * 0.5);
+  line-height:1;
+}
+.picto-texto .palabra{
+  font-weight:700;
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+/* Palabra sin pictograma: solo texto, con borde punteado */
+.picto-texto.sin-picto{
+  background: transparent;
+  border: 2px dashed var(--line);
+  box-shadow: none;
+  color: var(--ink-soft);
+  justify-content:center;
+  min-height: calc(var(--tam-picto) * 0.6);
+}
+
+/* En pantallas bajas (por ejemplo con el teclado abierto) el cuadro de texto cede espacio a los pictogramas */
+@media (max-height: 700px){
+  .modo-texto textarea{ min-height: 110px; }
+}
+
 /* ---------- Barra inferior: frase construida ---------- */
 /* Franja fija en la parte inferior con la frase armada y los botones de acción */
 .barra-frase{

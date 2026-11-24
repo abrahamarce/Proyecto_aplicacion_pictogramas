@@ -452,10 +452,74 @@ function hablarFrase(){
 /* =========================================================
    MODO TEXTO
    ========================================================= */
+// Quita tildes, mayúsculas y signos para comparar palabras ("Mamá," → "mama")
+function normalizarPalabra(texto){
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Índice palabra normalizada → pictograma. Incluye las formas conjugadas
+// de los verbos (quiero, voy, comés…) para que también encuentren su pictograma.
+const INDICE_PALABRAS = (function construirIndicePalabras(){
+  const indice = {};
+  PICTOGRAMAS.forEach(p => {
+    indice[normalizarPalabra(p.palabra)] = p;
+    if (p.conjugaciones){
+      Object.values(p.conjugaciones).forEach(forma => { indice[normalizarPalabra(forma)] = p; });
+    }
+  });
+  return indice;
+})();
+
+// Dibuja bajo el cuadro de texto un pictograma por cada palabra escrita.
+// Las palabras sin pictograma salen como cuadro de solo texto, para no perder la oración.
+function renderTextoPictogramas(texto){
+  const cont = document.getElementById('texto-pictogramas');
+  cont.innerHTML = '';
+
+  texto.split(/\s+/).filter(Boolean).forEach(palabra => {
+    const p = INDICE_PALABRAS[normalizarPalabra(palabra)];
+    const celda = document.createElement('div');
+    celda.setAttribute('role', 'listitem');
+
+    if (!p){
+      celda.className = 'picto-texto sin-picto';
+      celda.innerHTML = '<span class="palabra"></span>';
+      celda.querySelector('.palabra').textContent = palabra;
+      cont.appendChild(celda);
+      return;
+    }
+
+    const cat = CATEGORIAS.find(c => c.id === p.categoria);
+    celda.className = 'picto-texto';
+    celda.style.background = cat.color;
+    celda.style.color = cat.colorInk;
+
+    const img = document.createElement('img');
+    img.className = 'pictograma-img';
+    img.alt = '';
+    img.src = p.imagen;
+    // Si la imagen no carga, se usa el emoji como respaldo
+    img.onerror = () => {
+      const emoji = document.createElement('span');
+      emoji.className = 'emoji';
+      emoji.setAttribute('aria-hidden', 'true');
+      emoji.textContent = p.emoji;
+      img.replaceWith(emoji);
+    };
+
+    const etiqueta = document.createElement('span');
+    etiqueta.className = 'palabra';
+    etiqueta.textContent = palabra.replace(/^[¿¡"(]+|[?!.,;:")]+$/g, ''); // muestra lo que escribió, sin signos
+
+    celda.append(img, etiqueta);
+    cont.appendChild(celda);
+  });
+}
 function iniciarModoTexto() {
   const entradaTexto = document.getElementById('entrada-texto');
   const btnHablar = document.querySelector('.btn-hablar');
-
+ // Actualiza los pictogramas mientras se escribe
+  entradaTexto.addEventListener('input', () => renderTextoPictogramas(entradaTexto.value));
  // Helper function to read the textarea and speak:s
   function hablar() {
     const texto = entradaTexto.value.trim();
